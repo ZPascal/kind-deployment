@@ -1,11 +1,12 @@
 gorouter:
+  enabled: true
   certificateSecret: ""
   hostname: "gorouter.127-0-0-1.nip.io"
   appsDomain: "*.apps.127-0-0-1.nip.io"
   image:
     repository: ghcr.io/cloudfoundry/k8s/gorouter
     tag: ""
-  imagePullPolicy: IfNotPresent
+    imagePullPolicy: IfNotPresent
   nodeSelector: ~
   tolerations: ~
 
@@ -15,4 +16,52 @@ udpForwarder:
     repository: ghcr.io/cloudfoundry/k8s/udp-forwarder
     # renovate: dataSource=docker depName=loggregator-agent-release packageName=ghcr.io/cloudfoundry/k8s/udp-forwarder
     tag: "8.3.14"
+    imagePullPolicy: IfNotPresent
+
+routingApi:
+  enabled: true
+  certificateSecret: ""
+  loggregatorCertificateSecret: ""
+  uaaCertificateSecret: ""
+  systemDomain: "127-0-0-1.nip.io"
+  dbPassword: "postgres"
+  locketAddress: locket.default.svc.cluster.local:8891
+  uaa:
+    address: uaa.default.svc.cluster.local
+    port: 443
+  image:
+    repository: ghcr.io/cloudfoundry/k8s/routing-api
+    tag: ""
+    imagePullPolicy: IfNotPresent
+  nodeSelector: ~
+  tolerations: ~
+
+tcpRouter:
+  enabled: true
+  certificateSecret: ""
+  oauthClientsSecret: ""
+  image:
+    repository: ghcr.io/cloudfoundry/k8s/cf-tcp-router
+    tag: ""
+    imagePullPolicy: IfNotPresent
+  haproxy:
+    image:
+      repository: haproxy
+      tag: "3.3.3-alpine"
+      imagePullPolicy: IfNotPresent
+    resources: ~
+  uaa:
+    address: uaa.default.svc.cluster.local
+    port: 443
+  routingApi:
+    address: https://routing-api.default.svc.cluster.local
+    port: 3001
+  nodeSelector: ~
+  tolerations: ~
+
+routeRegistrar:
+  image:
+    repository: ghcr.io/cloudfoundry/k8s/route-registrar
+    # renovate: dataSource=docker depName=routing-release packageName=ghcr.io/cloudfoundry/k8s/route-registrar
+    tag: "0.365.0"
     imagePullPolicy: IfNotPresent
