@@ -9,12 +9,7 @@ versions:
   # renovate: dataSource=docker depName=cloudfoundry/cflinuxfs4-release packageName=ghcr.io/cloudfoundry/k8s/cflinuxfs4
   cflinuxfs4: "1.315.0"
 
-optionalComponents:
-  enableLoggregator: {{ env "ENABLE_LOGGREGATOR" | default "true" }}
-  enablePolicySupport: {{ env "ENABLE_POLICY_SUPPORT" | default "true" }}
-  enableNfsVolume: {{ env "ENABLE_NFS_VOLUME" | default "false" }}
-  enableTcpRouting: {{ env "ENABLE_TCP_ROUTING" | default "true" }}
-
+installOptionalComponents: {{ "INSTALL_OPTIONAL_COMPONENTS" | env | default "true" }}
 secrets:
   dbPassword: {{ requiredEnv "DB_PASSWORD" }}
   blobstorePassword: {{ requiredEnv "BLOBSTORE_PASSWORD" }}

@@ -182,7 +182,7 @@ releases:
   - name: tcp-routing
     namespace: default
     chart: ./releases/routing/helm
-    installed: {{ .Values.optionalComponents.enableTcpRouting }}
+    installed: {{ .Values.installOptionalComponents }}
     needs:
       - loggregator-agent
       - locket
@@ -204,7 +204,7 @@ releases:
   - name: loggregator
     namespace: default
     chart: ./releases/loggregator/helm
-    installed: {{ .Values.optionalComponents.enableLoggregator }}
+    installed: {{ .Values.installOptionalComponents }}
     needs:
       - istio-system/istiod
     values:
@@ -249,6 +249,7 @@ releases:
   - name: credhub
     namespace: default
     chart: ./releases/credhub/helm
+    installed: {{ .Values.installOptionalComponents }}
     needs:
       - uaa
       - postgresql
@@ -312,7 +313,7 @@ releases:
     needs:
       - diego
       - nats
-    {{ if .Values.optionalComponents.enablePolicySupport }}
+    {{ if .Values.installOptionalComponents }}
       - cf-networking
     {{ end }}
     values:
@@ -323,7 +324,7 @@ releases:
           enabled: true
           certificateSecret: all-in-one-tls
           routingApi:
-            enabled: {{ .Values.optionalComponents.enableTcpRouting }}
+            enabled: {{ .Values.installOptionalComponents }}
             certificateSecret: all-in-one-tls
           oauthClientsSecret: {{ .Values.secrets.oauthClientsSecret }}
           natsCertificateSecret: all-in-one-tls
@@ -331,8 +332,8 @@ releases:
           bbsCertificateSecret: all-in-one-tls
           locketCertificateSecret: all-in-one-tls
           uaaCertificateSecret: all-in-one-tls
-          enableInternalEmitter: {{ and .Values.optionalComponents.enablePolicySupport }}
-          enableTcpEmitter: {{ .Values.optionalComponents.enableTcpRouting }}
+          enableInternalEmitter: {{ .Values.installOptionalComponents }}
+          enableTcpEmitter: {{ .Values.installOptionalComponents }}
 
   - name: k8s-rep
     namespace: default
@@ -368,9 +369,6 @@ releases:
       - minio
       - diego
       - postgresql
-      {{- if .Values.optionalComponents.enableTcpRouting }}
-      - tcp-routing
-      {{- end }}
     values:
       - cloudController:
           enabled: true
@@ -390,10 +388,9 @@ releases:
   - name: nfs-volume
     namespace: default
     chart: ./releases/nfs-volume/helm
-    installed: {{ .Values.optionalComponents.enableNfsVolume }}
+    installed: {{ .Values.installOptionalComponents }}
     needs:
-      - uaa
-      - credhub
+      - capi
     values:
       - nfsbroker:
           enabled: true
@@ -405,7 +402,7 @@ releases:
   - name: cf-networking
     namespace: default
     chart: ./releases/cf-networking/helm
-    installed: {{ .Values.optionalComponents.enablePolicySupport }}
+    installed: {{ .Values.installOptionalComponents }}
     needs:
       - capi
       - uaa
@@ -430,10 +427,9 @@ releases:
     namespace: default
     chart: cloudfoundry-k8s/policy-agent
     version: "{{ .Values.versions.policyAgent }}"
-    installed: {{ .Values.optionalComponents.enablePolicySupport }}
+    installed: {{ .Values.installOptionalComponents }}
     needs:
       - cf-networking
-    {{ if .Values.optionalComponents.enablePolicySupport }}
     set:
       - name: certificateSecret
         value: all-in-one-tls
@@ -456,4 +452,3 @@ releases:
               }" "$COREFILE" | kubectl create configmap coredns -n kube-system --from-file=Corefile=/dev/stdin --dry-run=client -o yaml | kubectl apply -f -
               kubectl rollout restart deployment coredns -n kube-system
             }
-    {{ end }}
