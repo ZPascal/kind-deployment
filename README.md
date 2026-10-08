@@ -60,21 +60,14 @@ ADDITIONAL_VALUES_FILES=./my-values.yaml make up
 
 ### PostgreSQL configuration
 
-All components share one PostgreSQL. The `postgresql` Helmfile value is passed down to the PostgreSQL chart (merged last), so any chart value can be set through a custom values file. For example, to raise `max_connections` above the default of 100 (useful under load, e.g. long integration test runs failing with `too many clients already`):
+The `postgresql` value is passed to the PostgreSQL chart. For example, to raise `max_connections` (default 100), put this in a values file and use it via `ADDITIONAL_VALUES_FILES` (or the `additional-values-files` input of the `setup-cf` action):
 
 ```yaml
-# my-values.yaml
 postgresql:
   primary:
     extendedConfiguration: |
       max_connections = 500
 ```
-
-```bash
-ADDITIONAL_VALUES_FILES=./my-values.yaml make up
-```
-
-In the `setup-cf` GitHub Action, provide the file via the `additional-values-files` input.
 
 ## Using the `setup-cf` GitHub Action
 
