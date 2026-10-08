@@ -162,11 +162,7 @@ releases:
       - ./assets/values/postgresql.yaml
       - auth:
           password: {{ .Values.secrets.dbPassword }}
-        {{- if .Values.postgres.maxConnections }}
-        primary:
-          extendedConfiguration: |
-            max_connections = {{ .Values.postgres.maxConnections }}
-        {{- end }}
+      - {{- toYaml .Values.postgresql | nindent 8 }}
 
   - name: minio
     namespace: {{ .Values.systemNamespace }}

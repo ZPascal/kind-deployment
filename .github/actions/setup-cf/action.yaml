@@ -32,11 +32,6 @@ inputs:
     required: false
     type: boolean
     default: false
-  postgres-max-connections:
-    description: max_connections of the PostgreSQL that all components share, e.g. for long test runs. Empty keeps the PostgreSQL default.
-    required: false
-    type: string
-    default: ""
   additional-values-files:
     description: Comma-separated list of absolute paths to Helmfile values files to merge last, e.g. to override chart versions.
     required: false
@@ -80,7 +75,6 @@ runs:
       working-directory: kind-deployment
       env:
         INSTALL_OPTIONAL_COMPONENTS: ${{ inputs.install-optional-components }}
-        POSTGRES_MAX_CONNECTIONS: ${{ inputs.postgres-max-connections }}
         ADDITIONAL_VALUES_FILES: ${{ inputs.additional-values-files }}
       run: |
         if [ "${{ inputs.isolated-cell }}" = "true" ]; then

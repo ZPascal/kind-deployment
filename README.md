@@ -58,13 +58,23 @@ Set `ADDITIONAL_VALUES_FILES` environment variable to a comma-separated list of 
 ADDITIONAL_VALUES_FILES=./my-values.yaml make up
 ```
 
-### PostgreSQL connections
+### PostgreSQL configuration
 
-All components share one PostgreSQL, which keeps its default of 100 connections. Under load (e.g. long integration test runs) that can run out with `too many clients already`. Set the environment variable `POSTGRES_MAX_CONNECTIONS` (or the `postgres.maxConnections` Helmfile value) to raise `max_connections` from the start:
+All components share one PostgreSQL. The `postgresql` Helmfile value is passed down to the PostgreSQL chart (merged last), so any chart value can be set through a custom values file. For example, to raise `max_connections` above the default of 100 (useful under load, e.g. long integration test runs failing with `too many clients already`):
+
+```yaml
+# my-values.yaml
+postgresql:
+  primary:
+    extendedConfiguration: |
+      max_connections = 500
+```
 
 ```bash
-POSTGRES_MAX_CONNECTIONS=500 make up
+ADDITIONAL_VALUES_FILES=./my-values.yaml make up
 ```
+
+In the `setup-cf` GitHub Action, provide the file via the `additional-values-files` input.
 
 ## Using the `setup-cf` GitHub Action
 
@@ -89,7 +99,6 @@ Inputs (all optional):
 - `github-token` (string): GitHub API token, used when `use-latest-versions` is enabled to avoid rate limiting.
 - `ref` (string, default `main`): kind-deployment branch, tag or commit SHA that is checked out and deployed. Set it to the same commit as the action's `@<sha>` to get a fully pinned setup.
 - `use-latest-versions` (boolean, default `false`): sync to the latest `develop` versions of cf-deployment before deploying.
-- `postgres-max-connections` (string, default ''): `max_connections` of the shared PostgreSQL. Empty keeps the PostgreSQL default of 100; raise it for long test runs, e.g. `500`.
 - `additional-values-files` (string, default ''): comma-separated list of [Helmfile values](#custom-helmfile-values) files, merged last. Use it to override any value, e.g. a chart version (`charts.capi.version`). Must be absolute paths, e.g. `${{ github.workspace }}/capi-values.yaml`, since Helmfile runs from the checked-out `kind-deployment` directory.
 
 ## Unsupported Features
