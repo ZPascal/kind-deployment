@@ -58,6 +58,14 @@ Set `ADDITIONAL_VALUES_FILES` environment variable to a comma-separated list of 
 ADDITIONAL_VALUES_FILES=./my-values.yaml make up
 ```
 
+### PostgreSQL connections
+
+All components share one PostgreSQL, which keeps its default of 100 connections. Under load (e.g. long integration test runs) that can run out with `too many clients already`. Set the environment variable `POSTGRES_MAX_CONNECTIONS` (or the `postgres.maxConnections` Helmfile value) to raise `max_connections` from the start:
+
+```bash
+POSTGRES_MAX_CONNECTIONS=500 make up
+```
+
 ## Using the `setup-cf` GitHub Action
 
 This repository ships a composite action at `.github/actions/setup-cf` that provisions a full Cloud Foundry environment on a KinD cluster inside a GitHub Actions workflow. After it completes, the generated credentials from `temp/secrets.env` are exported into `$GITHUB_ENV`, so later steps can use the CF CLI directly.
@@ -81,6 +89,7 @@ Inputs (all optional):
 - `github-token` (string): GitHub API token, used when `use-latest-versions` is enabled to avoid rate limiting.
 - `ref` (string, default `main`): kind-deployment branch, tag or commit SHA that is checked out and deployed. Set it to the same commit as the action's `@<sha>` to get a fully pinned setup.
 - `use-latest-versions` (boolean, default `false`): sync to the latest `develop` versions of cf-deployment before deploying.
+- `postgres-max-connections` (string, default ''): `max_connections` of the shared PostgreSQL. Empty keeps the PostgreSQL default of 100; raise it for long test runs, e.g. `500`.
 - `additional-values-files` (string, default ''): comma-separated list of [Helmfile values](#custom-helmfile-values) files, merged last. Use it to override any value, e.g. a chart version (`charts.capi.version`). Must be absolute paths, e.g. `${{ github.workspace }}/capi-values.yaml`, since Helmfile runs from the checked-out `kind-deployment` directory.
 
 ## Unsupported Features
